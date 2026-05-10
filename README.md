@@ -78,19 +78,19 @@ python tests/test_failure.py
 - **Requests 1-3:** Backend tries to reach LLM, times out after 3s, and records a failure.
 - **Request 4+:** Circuit trips to `OPEN` state. Backend immediately returns a **Fallback Response** without waiting for the timeout, saving system resources.
 - **After 10s:** The circuit enters `HALF_OPEN` to attempt recovery.
-
-##  Demo Recording Guide
-
-To fulfill the "Before and After" demo requirement:
-
-1.  **Before (System Failing):**
-    - Call `GET http://localhost:8000/ask-ai?bypass=true` three times.
-    - Show that each request hangs for 3 seconds (timeout) and then fails. This demonstrates how the system blocks resources when a dependency is slow.
-2.  **After (System Succeeding with Circuit Breaker):**
-    - Call `GET http://localhost:8000/ask-ai` three times.
-    - After the 3rd failure, call it again.
-    - Show that the response is now **instant** (fallback), proving the Circuit Breaker is protecting the system from hanging.
-
+ 
+##  Visual Demonstration
+ 
+### 1. Before: System Hanging (Naive Implementation)
+In this scenario, we bypass the circuit breaker. Notice how each request hangs for **3 seconds** before failing. If we had 1,000 users, the entire server would stop responding because all threads would be busy waiting for this slow API.
+ 
+<img width="1366" height="470" alt="image" src="https://github.com/user-attachments/assets/f669ad98-aa7a-4f72-a446-b4638c8c2bd0" />
+ 
+### 2. After: System Resilient (Circuit Breaker Implementation)
+Here, the Circuit Breaker is active. After the 3rd failure, it "trips" and opens the circuit. Notice that Requests 4, 5, and 6 return **instantly (0.00s)**. Instead of hanging, the system immediately gives the user a friendly fallback message, keeping the application fast and stable.
+ 
+<img width="1307" height="1021" alt="image" src="https://github.com/user-attachments/assets/651b54c7-9608-4f42-af3d-05c02f7bcd08" />
+ 
 ##  Distributed Systems Requirements
 
 ### Custom Middleware Header
@@ -103,4 +103,3 @@ In this implementation, we prioritize **Availability** and **Latency** over **Co
 
 ---
 **Course:** Parallel and Distributed Computing (PDC)  
-**Instructor:** Tech With Tim (Reference Architecture)
